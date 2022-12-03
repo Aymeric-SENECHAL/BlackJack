@@ -14,9 +14,9 @@ public class BlackjackGame {
 	// Permet de lire ce qui est écrit dans le terminal
 	private Scanner ki = new Scanner(System.in);
 	private int numberPlayers;
-	private Player[] players;
 	private Deck deck;
-	private Dealer dealer = new Dealer();
+
+	private Players group = new Players();
 
 	// Starts game and displays the rules
 	public void initializeGame(){
@@ -41,17 +41,20 @@ public class BlackjackGame {
 			numberPlayers = ki.nextInt();
 		} while (numberPlayers > 6 || numberPlayers < 0);
 
-		players = new Player[numberPlayers];
+		for (int i = 0; i < numberPlayers; i++) {
+			group.add(new Players(100));
+		}
 
 		// On crée le deck
 		deck = new Deck();
 
 		// Asks for player names and assigns them
-		for (int i = 0; i < numberPlayers; i++) {
-			System.out.print("What is player " + (i + 1) + "'s name? ");
+		int idx = 0;
+		for (Players player : group.getPlayers()) {
+			System.out.print("What is player " + (idx + 1) + "'s name? ");
+			idx ++;
 			names = ki.next();
-			players[i] = new Player();
-			players[i].setName(names);
+			player.setName(names);
 		}
 	}
 	
@@ -63,15 +66,15 @@ public class BlackjackGame {
 	// Gets the bets from the players
 	public void getBets(){
 		int betValue;
-		
-		for (int i =0; i < numberPlayers; i++) {
-			if (players[i].getBank() > 0) {
+
+		for (Players player : group.getPlayers()) {
+			if (player.getBank() > 0) {
 				// On boucle si on souhaite miser moins que 0 et plus que ce que l'on a
 			do {
-				System.out.print("How much do you want to bet " + players[i].getName()  + (" (1-" + players[i].getBank()) + ")? " );
+				System.out.print("How much do you want to bet " + player.getName()  + (" (1-" + player.getBank()) + ")? " );
 				betValue = ki.nextInt();
-				players[i].setBet(betValue);
-			} while (!( betValue > 0 && betValue <= players[i].getBank()));
+				player.setBet(betValue);
+			} while (!( betValue > 0 && betValue <= player.getBank()));
 			System.out.println("");
 			}
 		}
@@ -80,13 +83,13 @@ public class BlackjackGame {
 	// Deals the cards to the players and dealer
 	public void dealCards(){
 		for (int j = 0; j < 2; j++) {
-			for (int i =0; i < numberPlayers; i++) {
-				if(players[i].getBank() > 0)
+			for (Players player : group.getPlayers()) {
+				if(player.getBank() > 0)
 				{
-				players[i].addCard(deck.nextCard());
+				player.addCard(deck.nextCard());
 				}
 			}
-			dealer.addCard(deck.nextCard());
+			group.addCard(deck.nextCard());
 		}
 	}
 	
@@ -94,26 +97,26 @@ public class BlackjackGame {
 	public void checkBlackjack(){
 		//System.out.println();
 
-		if (dealer.isBlackjack() ) {
+		if (group.isBlackjack() ) {
 			System.out.println("Dealer has BlackJack!");
-			for (int i =0; i < numberPlayers; i++) {
-				if (players[i].getTotal() == 21 ) {
-					System.out.println(players[i].getName() + " pushes");
-					players[i].push();
+			for (Players player : group.getPlayers()){
+				if (player.getTotal() == 21 ) {
+					System.out.println(player.getName() + " pushes");
+					player.push();
 				} else {
-					System.out.println(players[i].getName() + " loses");
-					players[i].bust();
+					System.out.println(player.getName() + " loses");
+					player.bust();
 				}	
 			}
 		} else {
-			if (dealer.peek() ) {
+			if (group.peek() ) {
 				System.out.println("Dealer peeks and does not have a BlackJack");
 			}
 
-			for (int i =0; i < numberPlayers; i++) {
-				if (players[i].getTotal() == 21 ) {
-					System.out.println(players[i].getName() + " has blackjack!");
-					players[i].blackjack();
+			for (Players player : group.getPlayers()) {
+				if (player.getTotal() == 21 ) {
+					System.out.println(player.getName() + " has blackjack!");
+					player.blackjack();
 				}
 			}
 		}		
@@ -123,22 +126,22 @@ public class BlackjackGame {
 	public void hitOrStand() {
 		String command;
 		char c;
-		for (int i = 0; i < numberPlayers; i++) {
-			if ( players[i].getBet() > 0 ) {
+		for (Players player : group.getPlayers()) {
+			if (player.getBet() > 0) {
 				System.out.println();
-				System.out.println(players[i].getName() + " has " + players[i].getHandString());
+				System.out.println(player.getName() + " has " + player.getHandString());
 
 				do {
 					do {
-						System.out.print(players[i].getName() + " (H)it or (S)tand? ");
+						System.out.print(player.getName() + " (H)it or (S)tand? ");
 						command = ki.next();
 						c = command.toUpperCase().charAt(0);
 					} while ( ! ( c == 'H' || c == 'S' ) );
 					if ( c == 'H' ) {
-						players[i].addCard(deck.nextCard());
-						System.out.println(players[i].getName() + " has " + players[i].getHandString());
+						player.addCard(deck.nextCard());
+						System.out.println(player.getName() + " has " + player.getHandString());
 					}
-				} while (c != 'S' && players[i].getTotal() <= 21 );
+				} while (c != 'S' && player.getTotal() <= 21 );
 			}
 		}
 	}
@@ -146,13 +149,14 @@ public class BlackjackGame {
 	// Code for the dealer to play
 	public void dealerPlays() {
 		boolean isSomePlayerStillInTheGame = false;
-		for (int i =0; i < numberPlayers && isSomePlayerStillInTheGame == false; i++){
-			if (players[i].getBet() > 0 && players[i].getTotal() <= 21 ) {
+
+		for (Players player : group.getPlayers()) {
+			if (player.getBet() > 0 && player.getTotal() <= 21 ) {
 				isSomePlayerStillInTheGame = true;
 			}
 		}
 		if (isSomePlayerStillInTheGame) {
-			dealer.dealerPlay(deck);
+			group.dealerPlay(deck);
 		}
 	}
 	
@@ -160,23 +164,23 @@ public class BlackjackGame {
 	public void settleBets() {
 		System.out.println();
 
-		for (int i = 0; i < numberPlayers; i++) {
-			if (players[i].getBet() > 0 ) {
-				if( players[i].getTotal() > 21 ) {
-					System.out.println(players[i].getName() + " has busted");
-					players[i].bust();
-				} else if ( players[i].getTotal() == dealer.calculateTotal() ) {
-					System.out.println(players[i].getName() + " has pushed");
-					players[i].push();
-				} else if ( players[i].getTotal() < dealer.calculateTotal() && dealer.calculateTotal() <= 21 ) {
-					System.out.println(players[i].getName() + " has lost");
-					players[i].loss();
-				} else if (players[i].getTotal() == 21) {
-					System.out.println(players[i].getName() + " has won with blackjack!");
-					players[i].blackjack();
+		for (Players player : group.getPlayers()) {
+			if (player.getBet() > 0 ) {
+				if( player.getTotal() > 21 ) {
+					System.out.println(player.getName() + " has busted");
+					player.bust();
+				} else if ( player.getTotal() == group.calculateTotal() ) {
+					System.out.println(player.getName() + " has pushed");
+					player.push();
+				} else if ( player.getTotal() < group.calculateTotal() && group.calculateTotal() <= 21 ) {
+					System.out.println(player.getName() + " has lost");
+					player.loss();
+				} else if (player.getTotal() == 21) {
+					System.out.println(player.getName() + " has won with blackjack!");
+					player.blackjack();
 				} else {
-					System.out.println(players[i].getName() + " has won");
-					players[i].win();
+					System.out.println(player.getName() + " has won");
+					player.win();
 					
 				}
 			}
@@ -186,36 +190,36 @@ public class BlackjackGame {
 
 	// This prints the players hands
 	public void printStatus() {
-		for (int i = 0; i < numberPlayers; i++) {
-			if(players[i].getBank() > 0)
+		for (Players player : group.getPlayers()) {
+			if(player.getBank() > 0)
 			{
-			System.out.println(players[i].getName() + " has " + players[i].getHandString());
+			System.out.println(player.getName() + " has " + player.getHandString());
 			}
 		}
-		System.out.println("Dealer has " + dealer.getHandString(true, true));
+		System.out.println("Dealer has " + group.getHandString(true, true));
 	}
 	
 	// This prints the players banks and tells the player if s/he is out of the game
 	public void printMoney() {
-		for (int i = 0; i < numberPlayers; i++) {
-			if(players[i].getBank() > 0)
+		for (Players player : group.getPlayers()) {
+			if(player.getBank() > 0)
 			{
-			System.out.println(players[i].getName() + " has " + players[i].getBank());
+			System.out.println(player.getName() + " has " + player.getBank());
 			}
-			if(players[i].getBank() == 0)
+			if(player.getBank() == 0)
 			{
-			System.out.println(players[i].getName() + " has " + players[i].getBank() + " and is out of the game.");
-			players[i].removeFromGame();
+			System.out.println(player.getName() + " has " + player.getBank() + " and is out of the game.");
+			player.removeFromGame();
 			}
 		}
 	}
 
 	// This code resets all hands
 	public void clearHands() {
-		for (int i = 0; i < numberPlayers; i++) {
-			players[i].clearHand();
+		for (Players player : group.getPlayers()) {
+			player.clearHand();
 		}
-		dealer.clearHand();
+		group.clearHand();
 	}
 	
 	// This decides to force the game to end when all players lose or lets players choose to keep playing or not
@@ -245,9 +249,9 @@ public class BlackjackGame {
 	public boolean forceEnd() {
 		boolean end = false;
 		int endCount = 0;
-		
-		for (int i = 0; i < numberPlayers; i++) {
-			if(players[i].getBank() == -1)
+
+		for (Players player : group.getPlayers()) {
+			if(player.getBank() == -1)
 			{
 				endCount++;
 			}
@@ -270,12 +274,12 @@ public class BlackjackGame {
 		int endAmount;
 		String endState = " no change.";
 		System.out.println("");
-		for (int i = 0; i < numberPlayers; i++) {
-			if(players[i].getBank() == -1)
+		for (Players player : group.getPlayers()) {
+			if(player.getBank() == -1)
 			{
-				players[i].resetBank();
+				player.resetBank();
 			}
-			endAmount = players[i].getBank() - 100;
+			endAmount = player.getBank() - 100;
 			if(endAmount > 0)
 			{
 				endState = " gain of ";
@@ -284,7 +288,7 @@ public class BlackjackGame {
 			{
 				endState = " loss of ";
 			}
-			System.out.println(players[i].getName() + " has ended the game with " + players[i].getBank() + ".");
+			System.out.println(player.getName() + " has ended the game with " + player.getBank() + ".");
 			if(endState != " no change.")
 			{
 			System.out.println("A" + endState + Math.abs(endAmount) + ".");

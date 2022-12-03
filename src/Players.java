@@ -1,18 +1,37 @@
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Player implements Serializable {
+public class Players implements Serializable {
 
+	// Nous avons le design pattern Composite
 	private int bank;
 	private int bet;
 	private String name;
 	private Hand hand;
-	
+
+	private List<Players> players;
+
 	// Creates a player object
-	public Player() {
-		bank = 100;
+	public Players() {
+		hand = new Hand();
+		players = new ArrayList<>();
+	}
+
+	public Players(int bank){
+		this.bank = bank;
 		hand = new Hand();
 	}
-	
+
+	public void add(Players player) {
+		players.add(player);
+	}
+
+	public List<Players> getPlayers(){
+		return players;
+	}
+
+
 	// Gets a player's bank amount
 	public int getBank() {
 		return bank;
@@ -97,6 +116,48 @@ public class Player implements Serializable {
 	// Clears a player's hand
 	public void clearHand() {
 		hand.clearHand();
+	}
+
+	/****/
+
+	public boolean isBlackjack(){
+		if (hand.calculateTotal() == 21){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// This automates the dealer's play
+	public void dealerPlay(Deck deck){
+		System.out.println();
+		while (hand.calculateTotal() <= 16) {
+			System.out.println("Dealer has " + hand.calculateTotal()+ " and hits");
+			hand.addCard(deck.nextCard());
+			System.out.println("Dealer " + this.getHandString(true, false));
+		}
+		if ( hand.calculateTotal() > 21) {
+			System.out.println("Dealer busts. " + this.getHandString(true, false));
+		} else {
+			System.out.println("Dealer stands. " + this.getHandString(true, false));
+		}
+	}
+
+	// Gets the dealer's hand as a string
+	public String getHandString(boolean isDealer, boolean hideHoleCard ) {
+		String str = "Cards:" + hand.toString(isDealer, hideHoleCard);
+
+		return str;
+	}
+
+	// Calculates the dealer's hand total
+	public int calculateTotal() {
+		return hand.calculateTotal();
+	}
+
+	// Peeks the dealer's face-down card
+	public boolean peek() {
+		return hand.dealerPeek();
 	}
 		
 }
