@@ -3,6 +3,14 @@ import java.util.Scanner;
 
 public class BlackjackGame {
 
+	private static BlackjackGame game = new BlackjackGame();
+
+	private BlackjackGame(){}
+
+	public static BlackjackGame getInstance() {
+		return game;
+	}
+
 	// Permet de lire ce qui est écrit dans le terminal
 	private Scanner ki = new Scanner(System.in);
 	private int numberPlayers;
@@ -208,7 +216,6 @@ public class BlackjackGame {
 			players[i].clearHand();
 		}
 		dealer.clearHand();
-
 	}
 	
 	// This decides to force the game to end when all players lose or lets players choose to keep playing or not
@@ -259,37 +266,37 @@ public class BlackjackGame {
 	}
 	
 	// This is the endgame code for when all players are out of the game or players decide to stop playing
-		public void endGame() {
-			int endAmount;
-			String endState = " no change.";
-			System.out.println("");
-			for (int i = 0; i < numberPlayers; i++) {
-				if(players[i].getBank() == -1)
-				{
-					players[i].resetBank();
-				}
-				endAmount = players[i].getBank() - 100;
-				if(endAmount > 0)
-				{
-					endState = " gain of ";
-				}
-				else if(endAmount < 0)
-				{
-					endState = " loss of ";
-				}
-				System.out.println(players[i].getName() + " has ended the game with " + players[i].getBank() + ".");
-				if(endState != " no change.")
-				{
-				System.out.println("A" + endState + Math.abs(endAmount) + ".");
-				}
-				else
-				{
-				System.out.println("No change from their starting value.");	
-				}
-				System.out.println("");
+	public void endGame() {
+		int endAmount;
+		String endState = " no change.";
+		System.out.println("");
+		for (int i = 0; i < numberPlayers; i++) {
+			if(players[i].getBank() == -1)
+			{
+				players[i].resetBank();
+			}
+			endAmount = players[i].getBank() - 100;
+			if(endAmount > 0)
+			{
+				endState = " gain of ";
+			}
+			else if(endAmount < 0)
+			{
+				endState = " loss of ";
+			}
+			System.out.println(players[i].getName() + " has ended the game with " + players[i].getBank() + ".");
+			if(endState != " no change.")
+			{
+			System.out.println("A" + endState + Math.abs(endAmount) + ".");
+			}
+			else
+			{
+			System.out.println("No change from their starting value.");
 			}
 			System.out.println("");
-			System.out.println("");
-			System.out.println("Thank you for playing!");
 		}
+		System.out.println("");
+		System.out.println("");
+		System.out.println("Thank you for playing!");
+	}
 }

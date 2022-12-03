@@ -10,30 +10,6 @@ public class Card implements Serializable {
 		this.suit = newSuit;
 	}
 
-	public String toString() {
-		return getSuitName() + " " + this.value;
-	}
-
-	public String getSuitName() {
-		String suit;
-		
-		if (this.suit == 'H') {
-			suit = "Hearts";
-		}
-		else if (this.suit == 'S') {
-			suit = "Spades";
-		}
-		else if (this.suit == 'C') {
-			suit = "Clubs";
-		}
-		else if (this.suit == 'D') {
-			suit = "Diamonds";
-		} else {
-			suit = "Unknown";
-		}
-
-		return suit;
-	}
 	public char getSuitDesignator() {
 		return suit;
 	}

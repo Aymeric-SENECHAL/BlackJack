@@ -85,7 +85,6 @@ public class Player implements Serializable {
 	// Adds a card to a player's hand
 	public void addCard(Card card) {
 		hand.addCard(card);
-
 	}
 	
 	// Gets the player's cards to print as a string

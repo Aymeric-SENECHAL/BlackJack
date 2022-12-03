@@ -27,11 +27,10 @@ public class Dealer implements Serializable {
 			System.out.println("Dealer stands. " + this.getHandString(true, false));
 		}
 	}
-	
+
 	// Adds a card o the dealer's hand
 	public void addCard(Card card) {
 		hand.addCard(card);
-
 	}
 	
 	// Gets the dealer's hand as a string

@@ -1,7 +1,10 @@
 public class Main {
+
+    // Ici nous avons le patron de conception Façade
     public static void main(String[] args) {
-        // Ici nous avons le patron de conception Façade
-        BlackjackGame mygame = new BlackjackGame();
+
+        // Nous avons crée un Singleton, pour avoir une seule partie à la fois.
+        BlackjackGame mygame = BlackjackGame.getInstance();
 
         mygame.initializeGame();
         do {
